@@ -1,27 +1,26 @@
 #!/usr/bin/env python3
 """
-module has responsible to detect element type.
+Module for safely retrieving a value from a dictionary with optional default value.
 """
-from typing import Mapping, Any, Union, Optional, TypeVar
+from typing import Mapping, Any, Optional, TypeVar
 
-T = TypeVar("T")
-
+T = TypeVar('T')
 
 def safely_get_value(
-    dct: Mapping[Any, Any], key: Any, default: Optional[Union[T, None]] = None
-) -> Union[Any, T]:
+    dct: Mapping[Any, Any], 
+    key: Any, 
+    default: Optional[T] = None
+) -> Optional[T]:
     """
-    Retrieve a value from a dictionary safely.
+    Retrieves the value from a dictionary if the key exists.
 
     Args:
-        dct (Mapping[Any, Any]): The dictionary from which to retrieve value.
-        key (Any): The key for the value to retrieve.
-        default (Optional[Union[T, None]]): The default value to return key
-        is not in the dictionary.
+        dct (Mapping[Any, Any]): The dictionary to search in.
+        key (Any): The key to look for in the dictionary.
+        default (Optional[T], optional): The default value to return.
 
     Returns:
-        Union[Any, T]: The value associated with the key in , or the
-        default value if the key is not found.
+        Optional[T]: The value associated with the key if it exists.
     """
     if key in dct:
         return dct[key]
