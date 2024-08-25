@@ -1,32 +1,28 @@
 #!/usr/bin/env python3
-"""
-Test module for GithubOrgClient.
-"""
+"""A module for testing the client module with and patch decorators."""
 
 import unittest
-from unittest.mock import patch
+from typing import Dict
+from unittest.mock import MagicMock, patch
 from parameterized import parameterized
 from client import GithubOrgClient
 
 
 class TestGithubOrgClient(unittest.TestCase):
-    """Test cases for GithubOrgClient class."""
+    """Tests the GithubOrgClient class."""
 
     @parameterized.expand([
-        ("google",),
-        ("abc",),
+        ("google", {"login": "google"}),
+        ("abc", {"login": "abc"}),
     ])
-    @patch('client.GithubOrgClient.get_json', return_value={"key": "value"})
-    def test_org(self, org_name, mock_get_json):
-        """
-        Test that GithubOrgClient.org returns the correct value.
-        Ensure get_json is called with the correct URL.
-        """
-        client = GithubOrgClient(org_name)
-        result = client.org()
-        expected_url = f"https://api.github.com/orgs/{org_name}"
-        mock_get_json.assert_called_once_with(expected_url)
-        self.assertEqual(result, mock_get_json.return_value)
+    @patch("client.get_json", return_value={"key": "value"})
+    def test_org(self, org: str, resp: Dict, mocked_fxn: MagicMock) -> None:
+        """Tests the org method of GithubOrgClient."""
+        mocked_fxn.return_value = resp
+        gh_org_client = GithubOrgClient(org)
+        self.assertEqual(gh_org_client.org(), resp)
+        url = f"https://api.github.com/orgs/{org}"
+        mocked_fxn.assert_called_once_with(url)
 
 
 if __name__ == "__main__":
