@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import unittest
 from unittest.mock import patch, PropertyMock
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 from client import GithubOrgClient  # Ensure this module is present
+import fixtures  # Assuming fixtures.py contains the necessary data
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -82,6 +83,51 @@ class TestGithubOrgClient(unittest.TestCase):
         """
         client = GithubOrgClient('google')
         self.assertEqual(client.has_license(repo, license_key), expected)
+
+
+@parameterized_class([
+    {
+        "org_payload": fixtures.ORG_PAYLOAD,
+        "repos_payload": fixtures.REPOS_PAYLOAD,
+        "expected_repos": fixtures.EXPECTED_REPOS,
+        "apache2_repos": fixtures.APACHE2_REPOS,
+    }
+])
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """Integration test for GithubOrgClient.public_repos."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Setup the mock for requests.get."""
+        cls.get_patcher = patch('requests.get')
+        cls.mock_get = cls.get_patcher.start()
+
+        def side_effect(url):
+            """Return different fixtures based on the URL."""
+            if url == f"https://api.github.com/orgs/google":
+                return cls.org_payload
+            elif url == f"https://api.github.com/orgs/google/repos":
+                return cls.repos_payload
+            return None
+
+        cls.mock_get.return_value.json.side_effect = side_effect
+
+    @classmethod
+    def tearDownClass(cls):
+        """Stop the patcher."""
+        cls.get_patcher.stop()
+
+    def test_public_repos(self):
+        """Test the public_repos method."""
+        client = GithubOrgClient('google')
+        repos = client.public_repos()
+
+        # Ensure the repos match the expected list
+        self.assertEqual(repos, self.expected_repos)
+
+        # Check for filtering with license
+        self.assertIn(self.apache2_repos, repos)
+        self.assertEqual(repos, self.expected_repos)
 
 
 if __name__ == "__main__":
