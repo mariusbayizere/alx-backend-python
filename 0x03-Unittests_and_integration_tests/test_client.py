@@ -43,34 +43,33 @@ class TestGithubOrgClient(unittest.TestCase):
             'https://api.github.com/orgs/google/repos'
         )
 
-    @patch('client.get_json',
-           return_value=[{'name': 'repo1'}, {'name': 'repo2'}])
+    @patch('client.get_json')
     @patch('client.GithubOrgClient._public_repos_url',
            new_callable=PropertyMock)
-    def test_public_repos(
-        self, mock_repos_url, mock_get_json
-    ):
+    def test_public_repos(self, mock_repos_url, mock_get_json):
         """
-        Test that GithubOrgClient.public_repos returns the correct list.
-        Ensures get_json is called once with the _public_repos_url.
+        Test the public_repos method.
+        Ensures that get_json is called with the correct URL,
+        and the repos are returned as expected.
         """
         mock_repos_url.return_value = (
-            "https://api.github.com/orgs/google/repos"
+            'https://api.github.com/orgs/google/repos'
         )
+        mock_get_json.return_value = [{'name': 'repo1'}, {'name': 'repo2'}]
 
         client = GithubOrgClient('google')
-        repos = client.public_repos()
+        result = client.public_repos()
 
-        # Check that the result is what we expect
-        self.assertEqual(repos, ['repo1', 'repo2'])
+        # Test that the result matches the expected list of repo names
+        self.assertEqual(result, ['repo1', 'repo2'])
 
-        # Verify that the _public_repos_url property was accessed once
-        mock_repos_url.assert_called_once()
-
-        # Verify that get_json was called once with the expected URL
+        # Test that get_json was called once with the correct URL
         mock_get_json.assert_called_once_with(
-            "https://api.github.com/orgs/google/repos"
+            'https://api.github.com/orgs/google/repos'
         )
+
+        # Test that the mocked property _public_repos_url was accessed once
+        mock_repos_url.assert_called_once()
 
 
 if __name__ == "__main__":
