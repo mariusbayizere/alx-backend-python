@@ -125,9 +125,13 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         # Ensure the repos match the expected list
         self.assertEqual(repos, self.expected_repos)
 
-        # Check for filtering with license
-        self.assertIn(self.apache2_repos, repos)
-        self.assertEqual(repos, self.expected_repos)
+    def test_public_repos_with_license(self):
+        """Test the public_repos method with license filtering."""
+        client = GithubOrgClient('google')
+        repos = client.public_repos(license="apache-2.0")
+
+        # Ensure the repos match the expected list of repos with the Apache-2.0
+        self.assertEqual(repos, self.apache2_repos)
 
 
 if __name__ == "__main__":
